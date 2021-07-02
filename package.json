@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/AvivBenchorin/monterey/issues"
   },
-  "homepage": "https://github.com/AvivBenchorin/monterey#readme"
+  "homepage": "https://github.com/AvivBenchorin/monterey#readme",
+  "devDependencies": {
+    "cypress": "^7.6.0"
+  }
 }

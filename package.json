@@ -1,0 +1,26 @@
+{
+  "name": "monterey",
+  "version": "1.0.0",
+  "description": "functional test framework for OpenSearch-Dashboards",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AvivBenchorin/monterey.git"
+  },
+  "keywords": [
+    "Cypress",
+    "OpenSearch-Dashboards"
+  ],
+  "author": "Aviv Benchorin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AvivBenchorin/monterey/issues"
+  },
+  "homepage": "https://github.com/AvivBenchorin/monterey#readme",
+  "devDependencies": {
+    "cypress": "^7.6.0"
+  }
+}

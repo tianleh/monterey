@@ -24,8 +24,9 @@ describe('opening OpenSearch-Dashboards', () =>{
 
     //Return to the home page before every test, and ensure page has loaded
     beforeEach(() => {
-        cy.visit('localhost:5601/app/home')
-        cy.get('[data-test-subj="breadcrumb first last"]', {timeout: 20000}).should('contain', 'Home')
+        cy.visit('localhost:5601/app/home').then(()=>{
+                cy.get('[data-test-subj="breadcrumb first last"]', {timeout: 20000}).should('contain', 'Home')
+        })
     })
 
     it('Exploring data in the Discover page', () => {

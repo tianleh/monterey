@@ -6,8 +6,7 @@ module.exports = {
   },
   extends: [
     'plugin:react/recommended',
-    'standard',
-    'plugin:cypress/recommended'
+    'standard'
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {

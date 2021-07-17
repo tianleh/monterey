@@ -1,4 +1,5 @@
 /**
+ * Current runtime - 76.46 seconds
  * dashboard_filtering test suite description:
  * 1) Create a new dashboard, populate with visualizations
  * 2) Set a filter that excludes all data, and check the visualizations for proper updates
@@ -305,7 +306,117 @@ describe('dashboard filtering', () => {
 
   describe('nested filtering', () => {
     before(() => {
+      // Go to the Dashboards list page
+      cy.visit('app/dashboards/list')
+    })
+    it('visualization saved with a query filters data', () => {
+      // Click the "Create dashboard" button
+      cy.get('[data-test-subj="newItemButton"]', { timeout: 20000 }).should('be.visible').click()
+      cy.get('[data-test-subj="emptyDashboardWidget"]').should('be.visible')
+      // Change the time to be between Jan 1 2018 and Apr 13, 2018
+      cy.get('[data-test-subj="superDatePickerShowDatesButton"]').should('be.visible').click()
 
+      cy.get('[data-test-subj="superDatePickerendDatePopoverButton"]').should('be.visible').click()
+      cy.get('[data-test-subj="superDatePickerAbsoluteTab"]').should('be.visible').click()
+      cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]').should('be.visible').type('{selectall}Apr 13, 2018 @ 00:00:00.000')
+      cy.get('[data-test-subj="superDatePickerendDatePopoverButton"]').should('be.visible').click()
+
+      cy.get('[data-test-subj="superDatePickerstartDatePopoverButton"]').should('be.visible').click()
+      cy.get('[data-test-subj="superDatePickerAbsoluteTab"]').should('be.visible').click()
+      cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]').should('be.visible').type('{selectall}Jan 1, 2018 @ 00:00:00.000')
+      cy.get('[data-test-subj="superDatePickerstartDatePopoverButton"]').should('be.visible').click()
+
+      cy.get('[data-test-subj="querySubmitButton"]').should('be.visible').click()
+
+      // Click the "Add" button
+      cy.get('[data-test-subj="dashboardAddPanelButton"]').should('be.visible').click()
+
+      // Select the visualization type
+      cy.get('[data-test-subj="savedObjectFinderFilterButton"]').should('be.visible').click()
+      cy.get('[data-test-subj="savedObjectFinderFilter-visualization"]').should('be.visible').click()
+      cy.get('[data-test-subj="savedObjectFinderFilterButton"]').should('be.visible').click()
+
+      cy.get('[data-test-subj="savedObjectFinderSearchInput"]').should('be.visible').type('Rendering-Test:-animal-sounds-pie')
+      cy.get('[data-test-subj="savedObjectTitleRendering-Test:-animal-sounds-pie"]').should('be.visible').click({ multiple: true })
+      cy.get('[data-test-subj="euiFlyoutCloseButton"]').click()
+      cy.get('svg > g > g.arcs > path.slice').should('be.length', 5)
+
+      cy.get('[data-test-subj="embeddablePanelToggleMenuIcon"]').click()
+      cy.get('[data-test-subj="embeddablePanelAction-editPanel"]').click()
+
+      cy.get('[data-test-subj="queryInput"]').type('{selectall}weightLbs:>50')
+      cy.get('[data-test-subj="querySubmitButton"]').click()
+      cy.get('svg > g > g.arcs > path.slice').should('be.length', 3)
+
+      cy.get('[data-test-subj="visualizeSaveButton"]').click()
+      cy.get('[data-test-subj="savedObjectTitle"]').type('{selectall}Rendering Test: animal sounds pie')
+      cy.get('[data-test-subj="saveAsNewCheckbox"]').click()
+      cy.get('[data-test-subj="returnToOriginModeSwitch"]').click()
+      cy.get('[data-test-subj="confirmSaveSavedObjectButton"]').click()
+
+      cy.get('[data-test-subj="toggleNavButton"]').click()
+      cy.get('[data-test-subj="collapsibleNavAppLink"]').contains('Dashboard').click()
+      cy.get('svg > g > g.arcs > path.slice').should('be.length', 3)
+    })
+
+    it('Nested visualization filter pills filters data as expected', () => {
+      cy.get('[data-test-subj="embeddablePanelToggleMenuIcon"]').click()
+      cy.get('[data-test-subj="embeddablePanelAction-editPanel"]').click()
+
+      cy.get('[data-test-subj="pieSlice-grr"]').click()
+      cy.get('svg > g > g.arcs > path.slice').should('be.length', 1)
+
+      // === to the saveVisualizationExpectSuccess function
+      cy.get('[data-test-subj="visualizeSaveButton"]').click()
+      cy.get('[data-test-subj="savedObjectTitle"]').type('{selectall}animal sounds pie')
+      cy.get('[data-test-subj="saveAsNewCheckbox"]').click()
+      cy.get('[data-test-subj="returnToOriginModeSwitch"]').click()
+      cy.get('[data-test-subj="confirmSaveSavedObjectButton"]').click()
+
+      cy.get('[data-test-subj="toggleNavButton"]').click()
+      cy.get('[data-test-subj="collapsibleNavAppLink"]').contains('Dashboard').click()
+      cy.get('svg > g > g.arcs > path.slice').should('be.length', 1)
+    })
+
+    it('Removing filter pills and query unfiters data as expected', () => {
+      cy.get('[data-test-subj="embeddablePanelToggleMenuIcon"]').click()
+      cy.get('[data-test-subj="embeddablePanelAction-editPanel"]').click()
+
+      cy.get('[data-test-subj="queryInput"]').type('{selectall}{backspace}')
+      cy.get('[data-test-subj="querySubmitButton"]').click()
+
+      cy.get('[data-test-subj="filter filter-enabled filter-key-sound.keyword filter-value-grr filter-unpinned "]').click()
+      cy.get('[data-test-subj="deleteFilter"]').click()
+
+      cy.get('svg > g > g.arcs > path.slice').should('be.length', 5)
+
+      cy.get('[data-test-subj="visualizeSaveButton"]').click()
+      cy.get('[data-test-subj="savedObjectTitle"]').type('{selectall}Rendering Test: animal sounds pie')
+      cy.get('[data-test-subj="saveAsNewCheckbox"]').click()
+      cy.get('[data-test-subj="returnToOriginModeSwitch"]').click()
+      cy.get('[data-test-subj="confirmSaveSavedObjectButton"]').click()
+
+      cy.get('[data-test-subj="toggleNavButton"]').click()
+      cy.get('[data-test-subj="collapsibleNavAppLink"]').contains('Dashboard').click()
+      cy.get('svg > g > g.arcs > path.slice').should('be.length', 5)
+    })
+    it('Pie chart linked to saved search filters data', () => {
+      cy.get('[data-test-subj="dashboardAddPanelButton"]').should('be.visible').click()
+
+      cy.get('[data-test-subj="savedObjectFinderFilterButton"]').should('be.visible').click()
+      cy.get('[data-test-subj="savedObjectFinderFilter-visualization"]').should('be.visible').click()
+      cy.get('[data-test-subj="savedObjectFinderFilterButton"]').should('be.visible').click()
+
+      cy.get('[data-test-subj="savedObjectFinderSearchInput"]').should('be.visible').type('Filter Test: animals: linked to search with filter')
+      cy.get('[data-test-subj="savedObjectTitleFilter-Test:-animals:-linked-to-search-with-filter"]').should('be.visible').click({ multiple: true })
+      cy.get('[data-test-subj="euiFlyoutCloseButton"]').click()
+      cy.get('svg > g > g.arcs > path.slice').should('be.length', 7)
+    })
+
+    it('Pie chart linked to saved search filters shows no data with conflicting dashboard query', () => {
+      cy.get('[data-test-subj="queryInput"]').type('{selectall}weightLbs<40')
+      cy.get('[data-test-subj="querySubmitButton"]').click()
+      cy.get('svg > g > g.arcs > path.slice').should('be.length', 5)
     })
   })
 })

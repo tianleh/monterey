@@ -13,12 +13,14 @@
 
 describe('dashboard filtering', () => {
   before(() => {
+    cy.viewport(1900, 1080)
     // Setup the indices
-    // cy.request('POST', 'localhost:9200/_bulk', cy.fixture('dashboard/data.json.gz'))
-    // cy.request('PUT', 'localhost:9200/', cy.fixture('dashboard/mappings.json'))
+    // cy.request('PUT', 'localhost:9200/.kibana_1', cy.fixture('dashboard/mappings.json'))
+    // cy.request('POST', 'localhost:9200/.kibana_1', cy.fixture('dashboard/data.json.gz'))
   })
 
   after(() => {
+    cy.viewport(1000, 660)
     // Delete the indices
     // cy.request('DELETE', 'localhost:9200')
   })
@@ -29,7 +31,7 @@ describe('dashboard filtering', () => {
       cy.visit('app/dashboards/list')
 
       // Click the "Create dashboard" button
-      cy.get('[data-test-subj="newItemButton"]').should('be.visible').click()
+      cy.get('[data-test-subj="newItemButton"]', { timeout: 20000 }).should('be.visible').click()
       cy.get('[data-test-subj="emptyDashboardWidget"]').should('be.visible')
       // Change the time to be between Jan 1 2018 and Apr 13, 2018
       cy.get('[data-test-subj="superDatePickerShowDatesButton"]').should('be.visible').click()
@@ -50,16 +52,14 @@ describe('dashboard filtering', () => {
       cy.get('[data-test-subj="dashboardAddPanelButton"]').should('be.visible').click()
 
       // Select the visualization type
-      cy.viewport(1900, 1080)
       cy.get('[data-test-subj="savedObjectFinderFilterButton"]').should('be.visible').click()
       cy.get('[data-test-subj="savedObjectFinderFilter-visualization"]').should('be.visible').click()
       cy.get('[data-test-subj="savedObjectFinderFilterButton"]').should('be.visible').click()
 
       cy.get('[data-test-subj="savedObjectFinderSearchInput"]').should('be.visible').type('Filter Bytes Test')
-      cy.get('[data-test-subj^="savedObjectTitleFilter-Bytes-Test:"]').should('be.visible').click({ multiple: true})
+      cy.get('[data-test-subj^="savedObjectTitleFilter-Bytes-Test:"]').should('be.visible').click({ multiple: true })
       cy.get('[data-test-subj="pagination-button-1"]').should('be.visible').click()
-      cy.get('[data-test-subj^="savedObjectTitleFilter-Bytes-Test:"]').should('be.visible').click({ multiple: true})
-      cy.viewport(1000, 660)
+      cy.get('[data-test-subj^="savedObjectTitleFilter-Bytes-Test:"]').should('be.visible').click({ multiple: true })
       cy.get('[data-test-subj="euiFlyoutCloseButton"]').click()
 
       // Click the "Add" button and add all "Saved Searches"
@@ -70,7 +70,7 @@ describe('dashboard filtering', () => {
       cy.get('[data-test-subj="savedObjectFinderFilterButton"]').should('be.visible').click()
 
       cy.get('[data-test-subj="savedObjectFinderSearchInput"]').should('be.visible').type('Filter Bytes Test')
-      cy.get('[data-test-subj^="savedObjectTitleFilter-Bytes-Test:"]').should('be.visible').click({ multiple: true})
+      cy.get('[data-test-subj^="savedObjectTitleFilter-Bytes-Test:"]').should('be.visible').click({ multiple: true })
 
       cy.get('[data-test-subj="euiFlyoutCloseButton"]').click()
 
@@ -78,54 +78,64 @@ describe('dashboard filtering', () => {
       cy.get('[data-test-subj="addFilter"]').click()
 
       cy.get('[data-test-subj="filterFieldSuggestionList"]').find('[data-test-subj="comboBoxInput"]').type('bytes')
-      cy.get('[data-test-subj="comboBoxOptionsList filterFieldSuggestionList-optionsList"]').find('[title="bytes"]').click()
+      cy.get('[data-test-subj="comboBoxOptionsList filterFieldSuggestionList-optionsList"]').find('[title="bytes"]').as('bytes').click()
 
       cy.get('[data-test-subj="filterOperatorList"]').find('[data-test-subj="comboBoxInput"]').type('is')
-      cy.get('[data-test-subj="filterOperatorList"]').should('have.length', 1)
-      cy.get('[data-test-subj="filterOperatorList"]').find('[data-test-subj="comboBoxInput"]').focus()
-      cy.get('[data-test-subj="comboBoxOptionsList filterOperatorList-optionsList"]').find('[title="is"]').should('be.visible').click({force: true})
+      cy.get('[data-test-subj="comboBoxOptionsList filterOperatorList-optionsList"]').find('[title="is"]').click({ force: true })
+
       cy.get('[data-test-subj="filterParams"]').find('input').type('12345678')
       cy.get('[data-test-subj="saveFilter"]').click()
+      cy.get('[data-test-subj="filter filter-enabled filter-key-bytes filter-value-12,345,678 filter-unpinned "]').should('be.visible')
     })
 
     it('filters on pie charts', () => {
-
+      // Check that none of the pie charts are occupied with data (show "No results found")
+      cy.get('svg > g > g.arcs > path.slice').should('not.exist')
     })
 
     it('area, bar and heatmap charts filtered', () => {
-
+      // Check that none of the charts are filled with data
+      cy.get('svg > g > g.series').should('not.exist')
     })
 
     it('data tables are filtered', () => {
-
+      // Check that none of the data tables are filled with data
+      cy.get('[data-test-subj="paginated-table-body"] [data-cell-content]').should('not.exist')
     })
 
     it('goal and guages are filtered', () => {
-
+      // Goal label should be 0, gauge label should be 0%
+      cy.get('svg > g > g > text.chart-label').each(($el, index, $list) => {
+        cy.get($el).contains(/^0%?$/)
+      })
     })
 
     it('tsvb time series shows no data message', () => {
-
+      // The no data message should be visible
+      cy.get('[data-test-subj="noTSVBDataMessage"]').should('be.exist')
     })
 
     it('metric value shows no data', () => {
-
+      // The metrics should show '-'
+      cy.get('.mtrVis__value').each(($el, index, $list) => {
+        cy.get($el).contains(/^ - $/)
+      })
     })
 
     it('tag cloud values are filtered', () => {
-
+      // cy.get('svg > g > g.series').should('not.exist')
     })
 
     it('tsvb metric is filtered', () => {
-
+      // cy.get('svg > g > g.series').should('not.exist')
     })
 
     it('tsvb top n is filtered', () => {
-
+      // cy.get('svg > g > g.series').should('not.exist')
     })
 
     it('saved search is filtered', () => {
-
+      // cy.get('svg > g > g.series').should('not.exist')
     })
 
     // TODO: Uncomment once https://github.com/elastic/kibana/issues/22561 is fixed
@@ -134,7 +144,7 @@ describe('dashboard filtering', () => {
     // })
 
     it('vega is filtered', () => {
-
+      // cy.get('svg > g > g.series').should('not.exist')
     })
   })
 
@@ -148,6 +158,10 @@ describe('dashboard filtering', () => {
     before(() => {
 
     })
+    // cy.get('[data-test-subj="filter filter-enabled filter-key-bytes filter-value-12,345,678 filter-unpinned "]').click()
+    // cy.get('[data-test-subj="deleteFilter"]').click()
+    // cy.get('[data-test-subj="filter filter-enabled filter-key-bytes filter-value-12,345,678 filter-unpinned "]').should('not.exist')
+    // cy.get('svg > g > g.series').should('exist')
   })
 
   describe('nested filtering', () => {

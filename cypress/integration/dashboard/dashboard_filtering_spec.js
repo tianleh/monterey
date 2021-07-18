@@ -1,5 +1,6 @@
 /**
  * Current runtime - 76.46 seconds
+ * New runtime - 114.31 seconds
  * dashboard_filtering test suite description:
  * 1) Create a new dashboard, populate with visualizations
  * 2) Set a filter that excludes all data, and check the visualizations for proper updates
@@ -257,7 +258,7 @@ describe('dashboard filtering', () => {
       // Goal label should be 7,544, gauge label should be 39.958%%
       cy.get('svg > g > g > text.chart-label').should('be.length', 2).each(($el, index, $list) => {
         // to do
-        // cy.get($el).contains(/^0%?$/)
+        cy.get($el).contains(/^(7,544)|(39.958%)$/)
       })
     })
 
@@ -270,7 +271,7 @@ describe('dashboard filtering', () => {
 
     it('tag cloud', () => {
       cy.get('[data-test-subj="tagCloudVisualization"]').each(($el, index, $list) => {
-        // cy.get($el).find('svg > g > text').contains(['9,972', '4,886', '1,944', '9,025'])
+        cy.get($el).find('svg > g > text').contains(/^9,972|4,886|1,944|9,025$/)
       })
     })
 
@@ -282,11 +283,13 @@ describe('dashboard filtering', () => {
 
     it('tsvb top n', () => {
       cy.get('[data-test-subj="tsvbTopNValue"]').should('be.length', 2).each(($el, index, $list) => {
-        // cy.get($el).contains(['6,308.125', '6,308.125'])
+        cy.get($el).contains(/^6,308.125$/)
       })
     })
-    it('tsvb markdown', async () => {
-      // dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.286']);
+    it('tsvb markdown', () => {
+      cy.get('[data-test-subj="tsvbMarkdown"]').should('be.length', 1).each(($el, index, $list) => {
+        cy.get($el).contains(/^7,209.286$/)
+      })
     })
     it('saved search is filtered', () => {
       cy.get('[data-test-subj="docTableExpandToggleColumn"]').should('be.length', 1)
@@ -299,6 +302,7 @@ describe('dashboard filtering', () => {
 
     it('vega is filtered', () => {
       cy.get('.vgaVis__view text').each(($el, index, $list) => {
+        // To do: need to figure out way to check that a 5,000 exists, rather than checking each
         // scy.get($el).contains(/^5,000$/)
       })
     })

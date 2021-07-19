@@ -36,57 +36,17 @@ describe('dashboard filtering', () => {
       cy.get('[data-test-subj="newItemButton"]', { timeout: 20000 }).should('be.visible').click()
       cy.get('[data-test-subj="emptyDashboardWidget"]').should('be.visible')
       // Change the time to be between Jan 1 2018 and Apr 13, 2018
-      cy.get('[data-test-subj="superDatePickerShowDatesButton"]').should('be.visible').click()
+      cy.setDashboardDataRange('Apr 13, 2018 @ 00:00:00.000', 'Jan 1, 2018 @ 00:00:00.000')
 
-      cy.get('[data-test-subj="superDatePickerendDatePopoverButton"]').should('be.visible').click()
-      cy.get('[data-test-subj="superDatePickerAbsoluteTab"]').should('be.visible').click()
-      cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]').should('be.visible').type('{selectall}Apr 13, 2018 @ 00:00:00.000')
-      cy.get('[data-test-subj="superDatePickerendDatePopoverButton"]').should('be.visible').click()
-
-      cy.get('[data-test-subj="superDatePickerstartDatePopoverButton"]').should('be.visible').click()
-      cy.get('[data-test-subj="superDatePickerAbsoluteTab"]').should('be.visible').click()
-      cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]').should('be.visible').type('{selectall}Jan 1, 2018 @ 00:00:00.000')
-      cy.get('[data-test-subj="superDatePickerstartDatePopoverButton"]').should('be.visible').click()
-
-      cy.get('[data-test-subj="querySubmitButton"]').should('be.visible').click()
-
-      // Click the "Add" button
-      cy.get('[data-test-subj="dashboardAddPanelButton"]').should('be.visible').click()
-
-      // Select the visualization type
-      cy.get('[data-test-subj="savedObjectFinderFilterButton"]').should('be.visible').click()
-      cy.get('[data-test-subj="savedObjectFinderFilter-visualization"]').should('be.visible').click()
-      cy.get('[data-test-subj="savedObjectFinderFilterButton"]').should('be.visible').click()
-
-      cy.get('[data-test-subj="savedObjectFinderSearchInput"]').should('be.visible').type('Filter Bytes Test')
-      cy.get('[data-test-subj^="savedObjectTitleFilter-Bytes-Test:"]').should('be.visible').click({ multiple: true })
-      cy.get('[data-test-subj="pagination-button-1"]').should('be.visible').click()
-      cy.get('[data-test-subj^="savedObjectTitleFilter-Bytes-Test:"]').should('be.visible').click({ multiple: true })
-      cy.get('[data-test-subj="euiFlyoutCloseButton"]').click()
+      // Add all "Filter Bytes Test" visualizations
+      cy.addDashboardPanels('Filter Bytes Test', 'visualization', true)
 
       // Click the "Add" button and add all "Saved Searches"
-      cy.get('[data-test-subj="dashboardAddPanelButton"]').should('be.visible').click()
-
-      cy.get('[data-test-subj="savedObjectFinderFilterButton"]').should('be.visible').click()
-      cy.get('[data-test-subj="savedObjectFinderFilter-search"]').should('be.visible').click()
-      cy.get('[data-test-subj="savedObjectFinderFilterButton"]').should('be.visible').click()
-
-      cy.get('[data-test-subj="savedObjectFinderSearchInput"]').should('be.visible').type('Filter Bytes Test')
-      cy.get('[data-test-subj^="savedObjectTitleFilter-Bytes-Test:"]').should('be.visible').click({ multiple: true })
-
-      cy.get('[data-test-subj="euiFlyoutCloseButton"]').click()
+      cy.addDashboardPanels('Filter Bytes Test', 'search', false)
 
       // Add filter
-      cy.get('[data-test-subj="addFilter"]').click()
+      cy.addDashboardFilter('bytes', 'is', '12345678')
 
-      cy.get('[data-test-subj="filterFieldSuggestionList"]').find('[data-test-subj="comboBoxInput"]').type('bytes')
-      cy.get('[data-test-subj="comboBoxOptionsList filterFieldSuggestionList-optionsList"]').find('[title="bytes"]').as('bytes').click()
-
-      cy.get('[data-test-subj="filterOperatorList"]').find('[data-test-subj="comboBoxInput"]').type('is')
-      cy.get('[data-test-subj="comboBoxOptionsList filterOperatorList-optionsList"]').find('[title="is"]').click({ force: true })
-
-      cy.get('[data-test-subj="filterParams"]').find('input').type('12345678')
-      cy.get('[data-test-subj="saveFilter"]').click()
       cy.get('[data-test-subj="filter filter-enabled filter-key-bytes filter-value-12,345,678 filter-unpinned "]').should('be.visible')
     })
 
@@ -318,31 +278,10 @@ describe('dashboard filtering', () => {
       cy.get('[data-test-subj="newItemButton"]', { timeout: 20000 }).should('be.visible').click()
       cy.get('[data-test-subj="emptyDashboardWidget"]').should('be.visible')
       // Change the time to be between Jan 1 2018 and Apr 13, 2018
-      cy.get('[data-test-subj="superDatePickerShowDatesButton"]').should('be.visible').click()
+      cy.setDashboardDataRange('Apr 13, 2018 @ 00:00:00.000', 'Jan 1, 2018 @ 00:00:00.000')
 
-      cy.get('[data-test-subj="superDatePickerendDatePopoverButton"]').should('be.visible').click()
-      cy.get('[data-test-subj="superDatePickerAbsoluteTab"]').should('be.visible').click()
-      cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]').should('be.visible').type('{selectall}Apr 13, 2018 @ 00:00:00.000')
-      cy.get('[data-test-subj="superDatePickerendDatePopoverButton"]').should('be.visible').click()
+      cy.addDashboardPanels('Rendering Test: animal sounds pie', 'visualization', false)
 
-      cy.get('[data-test-subj="superDatePickerstartDatePopoverButton"]').should('be.visible').click()
-      cy.get('[data-test-subj="superDatePickerAbsoluteTab"]').should('be.visible').click()
-      cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]').should('be.visible').type('{selectall}Jan 1, 2018 @ 00:00:00.000')
-      cy.get('[data-test-subj="superDatePickerstartDatePopoverButton"]').should('be.visible').click()
-
-      cy.get('[data-test-subj="querySubmitButton"]').should('be.visible').click()
-
-      // Click the "Add" button
-      cy.get('[data-test-subj="dashboardAddPanelButton"]').should('be.visible').click()
-
-      // Select the visualization type
-      cy.get('[data-test-subj="savedObjectFinderFilterButton"]').should('be.visible').click()
-      cy.get('[data-test-subj="savedObjectFinderFilter-visualization"]').should('be.visible').click()
-      cy.get('[data-test-subj="savedObjectFinderFilterButton"]').should('be.visible').click()
-
-      cy.get('[data-test-subj="savedObjectFinderSearchInput"]').should('be.visible').type('Rendering-Test:-animal-sounds-pie')
-      cy.get('[data-test-subj="savedObjectTitleRendering-Test:-animal-sounds-pie"]').should('be.visible').click({ multiple: true })
-      cy.get('[data-test-subj="euiFlyoutCloseButton"]').click()
       cy.get('svg > g > g.arcs > path.slice').should('be.length', 5)
 
       cy.get('[data-test-subj="embeddablePanelToggleMenuIcon"]').click()

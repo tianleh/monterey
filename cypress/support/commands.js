@@ -80,8 +80,9 @@ Cypress.Commands.add('addDashboardPanels', (keyword, type, multiplePages = true)
 
 /**
  * Add a specified filter a dashboard
- * @param {String} start Start datetime to set
- * @param {String} end  End datetime to set
+ * @param {String} field Field value to select
+ * @param {String} operator Operator value to select
+ * @param {String} value Value field input
  */
 Cypress.Commands.add('addDashboardFilter', (field, operator, value) => {
   cy.get('[data-test-subj="addFilter"]').click()
@@ -94,4 +95,19 @@ Cypress.Commands.add('addDashboardFilter', (field, operator, value) => {
 
   cy.get('[data-test-subj="filterParams"]').find('input').type(value)
   cy.get('[data-test-subj="saveFilter"]').click()
+})
+
+/**
+ * Save a dashboard visualization
+ * @param {String} title Field value to select
+ * @param {Boolean} saveAsNew Whether to save as new visualization
+ * @param {Boolean} returnToDashboard Whether to return to the home dashboard
+ */
+
+ Cypress.Commands.add('saveVisualization', (field, operator, value) => {
+  cy.get('[data-test-subj="visualizeSaveButton"]').click()
+  cy.get('[data-test-subj="savedObjectTitle"]').type('{selectall}animal sounds pie')
+  cy.get('[data-test-subj="saveAsNewCheckbox"]').click()
+  cy.get('[data-test-subj="returnToOriginModeSwitch"]').click()
+  cy.get('[data-test-subj="confirmSaveSavedObjectButton"]').click()
 })

@@ -121,3 +121,59 @@ Cypress.Commands.add('saveVisualization', (title, saveAsNew = false, returnToDas
   })
   cy.get('[data-test-subj="confirmSaveSavedObjectButton"]').click()
 })
+
+/**
+ * Asserts that there exists a certain number of instances of an element
+ * @param {String} selector Selector for element of interest
+ * @param {Number} numElements Number of expected elements
+ */
+
+Cypress.Commands.add('checkElementExists', (selector, numElements) => {
+  cy.get(selector).should('be.length', numElements)
+})
+
+/**
+ * Asserts that a certain element does not exist
+ * @param {String} selector Selector for element of interest
+ */
+
+Cypress.Commands.add('checkElementDoesNotExist', (selector) => {
+  cy.get(selector).should('not.exist')
+})
+
+/**
+ * Asserts that the components of a certain element does not exist
+ * @param {String} mainSelector Selector for element of interest
+ * @param {String} componentSelector Selector for subcomponent of interest
+ */
+
+Cypress.Commands.add('checkElementComponentDoesNotExist', (mainSelector, componentSelector) => {
+  cy.get(mainSelector).find(componentSelector).should('not.exist')
+})
+
+/**
+ * Asserts that each element of a given selector contains a certain value
+ * @param {String} selector Selector for element of interest
+ * @param {Number} numElements Number of expected elements to be returned
+ * @param {RegExp} value Regex value
+ */
+
+Cypress.Commands.add('checkElementContainsValue', (selector, numElements, value) => {
+  cy.get(selector).should('be.length', numElements).each(($el) => {
+    cy.get($el).contains(value)
+  })
+})
+
+/**
+ * Asserts that each element of a given selector has components that contain a certain value
+ * @param {String} mainSelector Selector for element of interest
+ * @param {String} componentSelector Selector for subcomponent of interest
+ * @param {Number} numElements Number of expected elements to be returned
+ * @param {RegExp} value Regex value
+ */
+
+Cypress.Commands.add('checkElementComponentContainsValue', (selector, componentSelector, numElements, value) => {
+  cy.get(selector).should('be.length', numElements).each(($el) => {
+    cy.get($el).find(componentSelector).contains(value)
+  })
+})

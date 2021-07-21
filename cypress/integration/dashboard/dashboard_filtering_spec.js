@@ -17,14 +17,23 @@ describe('dashboard filtering', () => {
     // which could block clicking on a button located behind it.
     cy.viewport(1900, 1080)
 
-    // TO DO: Setup the indices
-    // cy.request('PUT', 'localhost:9200/.kibana_1', cy.fixture('dashboard/mappings.json'))
-    // cy.request('POST', 'localhost:9200/.kibana_1', cy.fixture('dashboard/data.json.gz'))
+    // WORK IN PROGRESS: https://github.com/AvivBenchorin/monterey/issues/11
+    cy.clearJSONMapping('cypress/fixtures/dashboard/data/mappings.json.txt')
+
+    cy.wait(5000)
+    cy.importJSONMapping('cypress/fixtures/dashboard/opensearch_dashboards/mappings.json.txt')
+    cy.importJSONMapping('cypress/fixtures/dashboard/data/mappings.json.txt')
+
+    cy.wait(5000)
+    cy.importJSONDoc('cypress/fixtures/dashboard/opensearch_dashboards/data.json.txt')
+    cy.importJSONDoc('cypress/fixtures/dashboard/data/tempdata.json.txt')
+    cy.wait(20000)
   })
 
   after(() => {
-    // TO DO: Tear-down the indices
-    // cy.request('DELETE', 'localhost:9200')
+    // WORK IN PROGRESS: https://github.com/AvivBenchorin/monterey/issues/11
+    cy.wait(3000)
+    cy.clearJSONMapping('cypress/fixtures/dashboard/data/mappings.json.txt')
   })
 
   describe('adding a filter that excludes all data', () => {

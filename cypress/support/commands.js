@@ -105,7 +105,6 @@ Cypress.Commands.add('addDashboardFilter', (field, operator, value) => {
  * @param {Boolean} saveAsNew Whether to save as new visualization
  * @param {Boolean} returnToDashboard Whether to return to the home dashboard
  */
-
 Cypress.Commands.add('saveVisualization', (title, saveAsNew = false, returnToDashboard = false) => {
   cy.get('[data-test-subj="visualizeSaveButton"]').click()
   cy.get('[data-test-subj="savedObjectTitle"]').type('{selectall}' + title + '')
@@ -127,7 +126,6 @@ Cypress.Commands.add('saveVisualization', (title, saveAsNew = false, returnToDas
  * @param {String} selector Selector for element of interest
  * @param {Number} numElements Number of expected elements
  */
-
 Cypress.Commands.add('checkElementExists', (selector, numElements) => {
   cy.get(selector).should('be.length', numElements)
 })
@@ -136,7 +134,6 @@ Cypress.Commands.add('checkElementExists', (selector, numElements) => {
  * Asserts that a certain element does not exist
  * @param {String} selector Selector for element of interest
  */
-
 Cypress.Commands.add('checkElementDoesNotExist', (selector) => {
   cy.get(selector).should('not.exist')
 })
@@ -146,7 +143,6 @@ Cypress.Commands.add('checkElementDoesNotExist', (selector) => {
  * @param {String} mainSelector Selector for element of interest
  * @param {String} componentSelector Selector for subcomponent of interest
  */
-
 Cypress.Commands.add('checkElementComponentDoesNotExist', (mainSelector, componentSelector) => {
   cy.get(mainSelector).find(componentSelector).should('not.exist')
 })
@@ -157,7 +153,6 @@ Cypress.Commands.add('checkElementComponentDoesNotExist', (mainSelector, compone
  * @param {Number} numElements Number of expected elements to be returned
  * @param {RegExp} value Regex value
  */
-
 Cypress.Commands.add('checkElementContainsValue', (selector, numElements, value) => {
   cy.get(selector).should('be.length', numElements).each(($el) => {
     cy.get($el).contains(value)
@@ -171,9 +166,84 @@ Cypress.Commands.add('checkElementContainsValue', (selector, numElements, value)
  * @param {Number} numElements Number of expected elements to be returned
  * @param {RegExp} value Regex value
  */
-
 Cypress.Commands.add('checkElementComponentContainsValue', (selector, componentSelector, numElements, value) => {
   cy.get(selector).should('be.length', numElements).each(($el) => {
     cy.get($el).find(componentSelector).contains(value)
+  })
+})
+
+/**
+ * Read indices from a file and send to OpenSearch using the create index API
+ * @param {String} filename File path (with its root at the directory with the cypress.js file)
+ * @param {String} hostname Host name for OpenSearch
+ * @param {String} port Port for OpenSearch
+ */
+Cypress.Commands.add('importJSONMapping', (filepath, hostname = 'localhost', port = '9200') => {
+  cy.readFile(filepath, 'utf8').then((str) => {
+    const strSplit = str.split('\n\n')
+    cy.wrap(strSplit).each((element) => {
+      const json = JSON.parse(element)
+      if (json.type === 'index') {
+        const index = json.value.index
+        const settings = json.value.settings
+        const mappings = json.value.mappings
+        const aliases = json.value.aliases
+        const body = { settings, mappings, aliases }
+        cy.request({method: 'PUT', url: hostname + ':' + port + '/' + index, body: body, failOnStatusCode: false, log: true }).then((response) => {
+        
+        })
+      }
+    })
+  })
+})
+
+/**
+ * Read indices from a file and request for them to be deleted from OpenSearch using the delete index API
+ * @param {String} filename File path (with its root at the directory with the cypress.js file)
+ * @param {String} hostname Host name for OpenSearch
+ * @param {String} port Port for OpenSearch
+ */
+Cypress.Commands.add('clearJSONMapping', (filename, hostname = 'localhost', port = '9200') => {
+  cy.readFile(filename, 'utf8').then((str) => {
+    const strSplit = str.split('\n\n')
+    cy.wrap(strSplit).each((element, i, array) => {
+      const json = JSON.parse(element)
+      if (json.type === 'index') {
+        const index = json.value.index
+        cy.request({method: 'DELETE', url: hostname + ':' + port + '/' + index, failOnStatusCode: false, log: true }).then((response) => {
+        })
+      }
+    })
+  })
+})
+
+/**
+ * Read docss from a file and import them to OpenSearch using the bulk API
+ * @param {String} filename File path (with its root at the directory with the cypress.js file)
+ * @param {String} hostname Host name for OpenSearch
+ * @param {String} port Port for OpenSearch
+ */
+Cypress.Commands.add('importJSONDoc', (filename, hostname = 'localhost', port = '9200') => {
+  cy.readFile(filename, 'utf8').then((str) => {
+    const strSplit = str.split('\n\n')
+    cy.wrap(strSplit).then(($array) => {
+      const bulkLines = []
+      $array.forEach((element) => {
+        const json = JSON.parse(element)
+
+        const id = json.value.id
+        const index = json.value.index
+        const source = json.value.source
+
+        const body = { "index": {"_id": id, "_index": index }  }
+        const oneLineBody = JSON.stringify(body).replace('\n', ' ')
+        const oneLineSource = JSON.stringify(source).replace('\n', ' ')
+
+        bulkLines.push(oneLineBody)
+        bulkLines.push(oneLineSource)
+      })
+      cy.request({headers: {"Content-Type": "application/json"},method: 'POST', url: hostname + ':' + port + '/_bulk', body: bulkLines.join('\n') + '\n', failOnStatusCode: false, log: true }).then((response) => {
+      })
+    })
   })
 })

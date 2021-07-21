@@ -36,6 +36,7 @@ Cypress.Commands.add('setDashboardDataRange', (start, end) => {
   cy.get('[data-test-subj="superDatePickerAbsoluteTab"]').should('be.visible').click()
   cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]').should('be.visible').type('{selectall}' + start)
   cy.get('[data-test-subj="superDatePickerendDatePopoverButton"]').should('be.visible').click()
+  cy.get('[data-test-subj="superDatePickerAbsoluteTab"]').should('not.exist')
 
   cy.get('[data-test-subj="superDatePickerstartDatePopoverButton"]').should('be.visible').click()
   cy.get('[data-test-subj="superDatePickerAbsoluteTab"]').should('be.visible').click()
@@ -54,23 +55,24 @@ Cypress.Commands.add('setDashboardDataRange', (start, end) => {
 Cypress.Commands.add('addDashboardPanels', (keyword, type, multiplePages = true) => {
   const iteratePages = () => {
     cy.get('[data-test-subj="pagination-button-next"]').then(($nextBtn) => {
+      cy.get('[data-test-subj="savedObjectFinderItemList"]').should('be.visible')
       if ($nextBtn.is(':enabled')) {
         cy.wrap($nextBtn).click()
-        cy.get('[data-test-subj^="savedObjectTitle' + keyword.replace(/\s+/g, '-') + ':"]').should('be.visible').click({ multiple: true })
+        cy.get('[data-test-subj^="savedObjectTitle' + keyword.replace(/\s+/g, '-') + '"]').should('be.visible').click({ multiple: true })
         iteratePages()
       }
     })
   }
   cy.get('[data-test-subj="dashboardAddPanelButton"]').should('be.visible').click()
+  cy.get('[data-test-subj="savedObjectFinderItemList"]').should('be.visible')
 
-  // Open the filter type list, select the chosen type, and close the list
   cy.get('[data-test-subj="savedObjectFinderFilterButton"]').should('be.visible').click()
   cy.get('[data-test-subj="savedObjectFinderFilter-' + type + '"]').should('be.visible').click()
   cy.get('[data-test-subj="savedObjectFinderFilterButton"]').should('be.visible').click()
 
   cy.get('[data-test-subj="savedObjectFinderSearchInput"]').should('be.visible').type(keyword)
 
-  cy.get('[data-test-subj^="savedObjectTitle' + keyword.replace(/\s+/g, '-') + ':"]').should('be.visible').click({ multiple: true }).then(() => {
+  cy.get('[data-test-subj^="savedObjectTitle' + keyword.replace(/\s+/g, '-') + '"]').should('be.visible').click({ multiple: true }).then(() => {
     if (multiplePages) {
       iteratePages()
     }
@@ -88,10 +90,10 @@ Cypress.Commands.add('addDashboardFilter', (field, operator, value) => {
   cy.get('[data-test-subj="addFilter"]').click()
 
   cy.get('[data-test-subj="filterFieldSuggestionList"]').find('[data-test-subj="comboBoxInput"]').type(field)
-  cy.get('[data-test-subj="comboBoxOptionsList filterFieldSuggestionList-optionsList"]').find('[title="' + field + '"]').click()
+  cy.get('[data-test-subj="comboBoxOptionsList filterFieldSuggestionList-optionsList"]').find('[title="' + field + '"]').click({ force: true })
 
   cy.get('[data-test-subj="filterOperatorList"]').find('[data-test-subj="comboBoxInput"]').type(operator)
-  cy.get('[data-test-subj="comboBoxOptionsList filterOperatorList-optionsList"]').find('[title="' + operator + '"]').click({ force: true, scrollBehavior: false })
+  cy.get('[data-test-subj="comboBoxOptionsList filterOperatorList-optionsList"]').find('[title="' + operator + '"]').click({ force: true })
 
   cy.get('[data-test-subj="filterParams"]').find('input').type(value)
   cy.get('[data-test-subj="saveFilter"]').click()
@@ -104,10 +106,18 @@ Cypress.Commands.add('addDashboardFilter', (field, operator, value) => {
  * @param {Boolean} returnToDashboard Whether to return to the home dashboard
  */
 
- Cypress.Commands.add('saveVisualization', (field, operator, value) => {
+Cypress.Commands.add('saveVisualization', (title, saveAsNew = false, returnToDashboard = false) => {
   cy.get('[data-test-subj="visualizeSaveButton"]').click()
-  cy.get('[data-test-subj="savedObjectTitle"]').type('{selectall}animal sounds pie')
-  cy.get('[data-test-subj="saveAsNewCheckbox"]').click()
-  cy.get('[data-test-subj="returnToOriginModeSwitch"]').click()
+  cy.get('[data-test-subj="savedObjectTitle"]').type('{selectall}' + title + '')
+  cy.get('[data-test-subj="saveAsNewCheckbox"]').then(($checkbox) => {
+    if (saveAsNew === false) {
+      cy.get($checkbox).click()
+    }
+  })
+  cy.get('[data-test-subj="returnToOriginModeSwitch"]').then(($checkbox) => {
+    if (returnToDashboard === false) {
+      cy.get($checkbox).click()
+    }
+  })
   cy.get('[data-test-subj="confirmSaveSavedObjectButton"]').click()
 })
